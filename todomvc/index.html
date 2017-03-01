@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>TodoMVC in Elm</title>
+    <link rel="stylesheet" href="todomvc.css" type="text/css" />
+    <script type="text/javascript" src="elm.js"></script>
+    <script>
+      function initElm() {
+        var app = Elm.Main.fullscreen();
+
+        var todoModelJsonKey = 'todoModelJson';
+
+        app.ports.storage.subscribe(function (todoModelJson) {
+          localStorage.setItem(todoModelJsonKey, JSON.stringify(todoModelJson));
+        });
+
+        app.ports.storageInput.send(JSON.parse(localStorage.getItem(todoModelJsonKey)));
+      }
+    </script>
+  </head>
+  <body onload="initElm()">
+  </body>
+</html>

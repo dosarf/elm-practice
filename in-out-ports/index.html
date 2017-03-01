@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>In &amp; out ports exercise</title>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" src="elm.js"></script>
+    <script>
+      function init() {
+        var jsUnorderedList = document.getElementById('js-unordered-list');
+
+        var elmAppNode = document.getElementById('elm-app');
+        var app = Elm.Main.embed(elmAppNode);
+
+        app.ports.sendCount.subscribe(function (count) {
+          var listItemNode = document.createElement('li');
+          listItemNode.textContent = 'Count: ' + count;
+          jsUnorderedList.appendChild(listItemNode);
+        });
+
+        var kamolosoButton = document.getElementById('kamoloso');
+        kamolosoButton.onclick = function() {
+          app.ports.incrementCount.send(1);
+        };
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <div id="js-app">
+      <ul id="js-unordered-list">
+        <li>Kamoloso <input id="kamoloso" type="button" value="Increment count in Elm"/></li>
+      </ul>
+    </div>
+    <div id="elm-app"/>
+  </body>
+</html>
