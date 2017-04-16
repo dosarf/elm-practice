@@ -44,7 +44,7 @@ type alias Model =
     , frequency : Float
     , windowWidth : Int
     , windowHeight : Int
-    , visualizationData : List (List Int)
+    , visualizationPointsList : List (List ( Float, Float ))
     }
 
 
@@ -54,7 +54,7 @@ init =
       , frequency = 3000
       , windowWidth = 100
       , windowHeight = 100
-      , visualizationData = []
+      , visualizationPointsList = []
       }
     , getInitialWindowSize
     )
@@ -202,13 +202,16 @@ getInitialWindowSize =
 
 
 updateVisualizationData : List Int -> Model -> Model
-updateVisualizationData data model =
+updateVisualizationData visualizationData model =
     let
-        newVisualizationData =
-            data
-                :: model.visualizationData
+        newVisualizationPoints =
+            toVisualizationPoints model.windowWidth model.windowHeight visualizationData
+
+        newVisualizationPointsList =
+            newVisualizationPoints
+                :: model.visualizationPointsList
     in
-        { model | visualizationData = List.take pastVisualizationCount newVisualizationData }
+        { model | visualizationPointsList = List.take pastVisualizationCount newVisualizationPointsList }
 
 
 
@@ -219,15 +222,12 @@ visualizationGraph : Model -> Element
 visualizationGraph model =
     collage model.windowWidth
         model.windowHeight
-        (List.indexedMap (visualizationGraphForDatum model.windowWidth model.windowHeight) model.visualizationData)
+        (List.indexedMap (visualizationGraphForDatum model.windowWidth model.windowHeight) model.visualizationPointsList)
 
 
-visualizationGraphForDatum : Int -> Int -> Int -> List Int -> Form
-visualizationGraphForDatum windowWidth windowHeight count datum =
+visualizationGraphForDatum : Int -> Int -> Int -> List ( Float, Float ) -> Form
+visualizationGraphForDatum windowWidth windowHeight count visualizationPoints =
     let
-        points =
-            toPoints windowWidth windowHeight count datum
-
         alphaLevel =
             case count of
                 0 ->
@@ -236,7 +236,7 @@ visualizationGraphForDatum windowWidth windowHeight count datum =
                 _ ->
                     0.1
     in
-        path points
+        path visualizationPoints
             |> traced (solid red)
             |> alpha alphaLevel
             |> move ( (toFloat windowWidth) / -2, (toFloat windowHeight) / -2 )
@@ -247,8 +247,8 @@ visualizationGraphForDatum windowWidth windowHeight count datum =
 -- the window width and height.
 
 
-toPoints : Int -> Int -> Int -> List Int -> List ( Float, Float )
-toPoints windowWidth windowHeight count datum =
+toVisualizationPoints : Int -> Int -> List Int -> List ( Float, Float )
+toVisualizationPoints windowWidth windowHeight datum =
     let
         -- The width of each slice is the window width divided by the number of
         -- data points we have.
